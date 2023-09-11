@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Navayuga</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            text-align: center;
+            background-color:lightcyan;
+        }
+        h1{
+            text-decoration: underline;
+            color:rgb(14, 68, 70);;
+            text-align: center;
+        }
+        h2,h3{
+            text-decoration: underline dotted;
+            text-align: center;
+            color:rgb(31, 161, 165)
+        }
+        body {
+
+            font-family: Arial, sans-serif;
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: rgb(31, 161, 165);
+        }
+        tr:nth-child(odd) {
+            background-color: grey;
+        }
+        th {
+            color:rgb(14, 68, 70);
+            background-color: white;
+        }
+</style>
+</head>
+<body>
+<h1>Navayuga Toll Plaza Software</h1>
+<h2>Nelamangla Toll Plaza</h2>
+    <form id="entryForm">
+<label for="vehicleCategory">Vehicle Category:</label>
+<select id="vehicleCategory" name="vehicleCategory">
+<option value="Bike">Bike</option>
+<option value="LMV">LMV</option>
+<option value="HMV">HMV</option>
+<option value="Heavy Truck">Heavy Truck</option>
+</select><br><br>
+        <label for="vehicleRegNo">Vehicle Registration Number:</label>
+<input type="text" id="vehicleRegNo" name="vehicleRegNo"><br><br>
+        <input type="submit" value="Submit">
+</form>
+    <h2>Stats</h2>
+<table id="stats">
+<tr>
+<th>Vehicle Category</th>
+<th>Total Amount Collected</th>
+</tr>
+</table>
+    <h2>Search</h2>
+<form id="searchForm">
+<label for="searchCategory">Vehicle Category:</label>
+<select id="searchCategory" name="searchCategory">
+<option value="">All</option>
+<option value="Bike">Bike</option>
+<option value="LMV">LMV</option>
+<option value="HMV">HMV</option>
+<option value="Heavy Truck">Heavy Truck</option>
+</select><br><br>
+        <label for="searchRegNo">Vehicle Registration Number:</label>
+<input type="text" id="searchRegNo" name="searchRegNo"><br><br>
+        <input type="submit" value="Search">
+</form>
+<br><br>
+    <table id="searchResultsTable">
+<tr>
+<th>Vehicle Category</th>
+<th>Vehicle Registration Number</th>
+<th>Toll Amount</th>
+</tr>
+</table>
+<script src="./jquery.min.js"></script>
+    <!-- Add custom script -->
+<script type='text/javascript'>
+      const prices = {
+          "Bike": 10,
+          "LMV": 20,
+          "HMV": 30,
+          "Heavy Truck": 40
+      };
+      <!-- // Initialize statistics object -->
+      let stats= {
+          "Bike": 0,
+          "LMV": 0,
+          "HMV": 0,
+          "Heavy Truck": 0
+      };
+      let entries = [];
+      // Check if there is data in localStorage
+      if (localStorage.getItem("stats") !== null) {
+          stats = JSON.parse(localStorage.getItem("stats"));
+      }
+      if (localStorage.getItem("entries") !== null) {
+          entries = JSON.parse(localStorage.getItem("entries"));
+      }
+      function update() {
+
+          $("#stats tr").not(":first").remove();
+          $.each(stats, function(key, value) {
+
+              $("#stats").append("<tr><td>" + key + "</td><td>" + value + "</td></tr>");
+          });
+      }
+      update();
+      // Handle form submission
+      $("#entryForm").submit(function(event) {
+          event.preventDefault();
+          let vehicleCategory = $("#vehicleCategory").val();
+          let vehicleRegNo = $("#vehicleRegNo").val();
+          let tollAmount = prices[vehicleCategory];
+          stats[vehicleCategory] += tollAmount;
+          entries.push({
+              vehicleCategory: vehicleCategory,
+              vehicleRegNo: vehicleRegNo,
+              tollAmount: tollAmount
+          });
+          localStorage.setItem("stats", JSON.stringify(stats));
+          localStorage.setItem("entries", JSON.stringify(entries));
+          update();
+          $("#entryForm")[0].reset();
+      });
+      // Handle search form submission
+      $("#searchForm").submit(function(event) {
+          event.preventDefault();
+          let searchCategory = $("#searchCategory").val();
+          let searchRegNo = $("#searchRegNo").val();
+          let filteredEntries = entries.filter(function(entry) {
+              return (searchCategory === "" || entry.vehicleCategory === searchCategory) && (searchRegNo === "" || entry.vehicleRegNo === searchRegNo);
+          });
+          $("#searchResultsTable tr").not(":first").remove();
+          $.each(filteredEntries, function(index, entry) {
+              $("#searchResultsTable").append("<tr><td>" + entry.vehicleCategory + "</td><td>" + entry.vehicleRegNo + "</td><td>" + entry.tollAmount + "</td></tr>");
+          });
+      });
+</script>
+</body>
+</html>
